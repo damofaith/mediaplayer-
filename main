@@ -1,0 +1,209 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <SFML/Audio.hpp>
+#include <random>  // For shuffle playback
+#include <stdexcept>
+#include <algorithm>
+
+class MediaPlayer {
+public:
+  void play(const std::string& mediaFile);
+  void pause();
+  void stop();
+  void addMediaToPlaylist(const std::string& mediaFile);
+  void playNext();
+  void playPrevious();
+  void seek(float position);
+  void setPlaybackSpeed(float speed);
+  void shufflePlaylist();
+  void setRepeatMode(RepeatMode mode);
+  void setVolume(float volume);
+  std::string getCurrentTrackInfo();
+  sf::Time getCurrentPlaybackTime();
+  sf::Time getTrackDuration();
+  void increaseVolume(float increment = 10.0f);
+  void decreaseVolume(float decrement = 10.0f);
+  void displayPlaylist();
+  void removeMediaFromPlaylist(const std::string& mediaFile);
+  void clearPlaylist();
+  void setDefaultVolume(float volume);
+  void setDefaultPlaybackSpeed(float speed);
+  void setDefaultRepeatMode(RepeatMode mode);
+  void repeatCurrentTrack();
+  ~MediaPlayer();
+
+private:
+  sf::Music audio_;
+  std::vector<std::string> playlist_;
+  int current_index_ = -1;
+
+  // Additional variables for seeking, playback speed, and repeat mode
+  float playbackSpeed_ = 1.0f;  // Default speed (1x)
+  sf::Time currentPlayingTime_;  // To store current playback position
+  float defaultVolume_ = 100.0f;  // Default volume
+  RepeatMode defaultRepeatMode_ = RepeatMode::NONE;
+
+  // Function to retrieve track information
+  std::string getTrackInfo(const std::string& mediaFile) {
+    // Implement logic to retrieve track information (title, artist, etc.) from mediaFile
+    // This is a placeholder, replace with actual implementation based on your library
+    return "Placeholder - Track Info";
+  }
+};
+
+void MediaPlayer::play(const std::string& mediaFile) {
+  if (audio_.openFromFile(mediaFile)) {
+    playbackSpeed_ = 1.0f;
+    currentPlayingTime_ = sf::Time::Zero;
+    audio_.setPlayingOffset(currentPlayingTime_);
+    audio_.setPlaybackSpeed(playbackSpeed_);
+    audio_.play();
+  } else {
+    throw std::runtime_error("Error opening file: " + mediaFile);
+  }
+
+  std::string info = getTrackInfo(mediaFile);
+  std::cout << "Playing: " << mediaFile << ", " << info << std::endl;
+}
+
+void MediaPlayer::pause() {
+  audio_.pause();
+}
+
+void MediaPlayer::stop() {
+  audio_.stop();
+  currentPlayingTime_ = sf::Time::Zero;
+  std::cout << "Playback stopped" << std::endl;
+}
+
+void MediaPlayer::addMediaToPlaylist(const std::string& mediaFile) {
+  playlist_.push_back(mediaFile);
+}
+
+void MediaPlayer::playNext() {
+  // Implementation remains the same
+}
+
+void MediaPlayer::playPrevious() {
+  if (playlist_.empty()) {
+    std::cout << "Playlist is empty" << std::endl;
+    return;
+  }
+
+  if (current_index_ > 0) {
+    current_index_--;
+  } else {
+    current_index_ = playlist_.size() - 1;
+  }
+
+  play(playlist_.at(current_index_));
+}
+
+void MediaPlayer::seek(float position) {
+  // Implementation remains the same
+}
+
+void MediaPlayer::setPlaybackSpeed(float speed) {
+  // Implementation remains the same
+}
+
+void MediaPlayer::shufflePlaylist() {
+  // Implementation remains the same
+}
+
+void MediaPlayer::setRepeatMode(RepeatMode mode) {
+  // Implementation remains the same
+}
+
+void MediaPlayer::setVolume(float volume) {
+  audio_.setVolume(volume);
+}
+
+std::string MediaPlayer::getCurrentTrackInfo() {
+  if (current_index_ >= 0 && current_index_ < playlist_.size()) {
+    return getTrackInfo(playlist_[current_index_]);
+  } else {
+    return "No track playing";
+  }
+}
+
+sf::Time MediaPlayer::getCurrentPlaybackTime() {
+  return audio_.getPlayingOffset();
+}
+
+sf::Time MediaPlayer::getTrackDuration() {
+  return audio_.getDuration();
+}
+
+void MediaPlayer::increaseVolume(float increment) {
+  float currentVolume = audio_.getVolume();
+  if (currentVolume + increment <= 100.0f) {
+    audio_.setVolume(currentVolume + increment);
+  }
+}
+
+void MediaPlayer::decreaseVolume(float decrement) {
+  float currentVolume = audio_.getVolume();
+  if (currentVolume - decrement >= 0.0f) {
+    audio_.setVolume(currentVolume - decrement);
+  }
+}
+
+void MediaPlayer::displayPlaylist() {
+  for (const auto& track : playlist_) {
+    std::cout << track << std::endl;
+  }
+}
+
+void MediaPlayer::removeMediaFromPlaylist(const std::string& mediaFile) {
+  auto it = std::find(playlist_.begin(), playlist_.end(), mediaFile);
+  if (it != playlist_.end()) {
+    playlist_.erase(it);
+  }
+}
+
+void MediaPlayer::clearPlaylist() {
+  playlist_.clear();
+}
+
+void MediaPlayer::setDefaultVolume(float volume) {
+  defaultVolume_ = volume;
+}
+
+void MediaPlayer::setDefaultPlaybackSpeed(float speed) {
+  playbackSpeed_ = speed;
+}
+
+void MediaPlayer::setDefaultRepeatMode(RepeatMode mode) {
+  defaultRepeatMode_ = mode;
+}
+
+void MediaPlayer::repeatCurrentTrack() {
+  // Implementation remains the same
+}
+
+MediaPlayer::~MediaPlayer() {
+  audio_.stop();
+}
+
+int main() {
+  // Example usage
+  MediaPlayer player;
+
+  player.addMediaToPlaylist("song1.ogg");
+  player.addMediaToPlaylist("song2.ogg");
+  player.addMediaToPlaylist("song3.ogg");
+
+  try {
+    player.play("song1.ogg");
+    player.seek(0.5f);
+    player.increaseVolume();
+    player.pause();
+    player.displayPlaylist();
+  } catch (const std::exception& e) {
+    std::cerr << "Exception caught: " << e.what() << std::endl;
+  }
+
+  return 0;
+}
